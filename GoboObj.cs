@@ -9,6 +9,13 @@ namespace GoboImageProcessor
     {
         static private int _series = 1;
 
+        public static int Count
+        {
+            get
+            {
+                return _series;
+            }
+        }
 
         public string Name { get; set; }
         public string FileName { get; set; }
@@ -28,7 +35,7 @@ namespace GoboImageProcessor
         {
             get
             {
-                return $"ON{Series:D2} {Name}";
+                return $"On{Series:D2} {Name}";
             }
         }
 
@@ -36,7 +43,7 @@ namespace GoboImageProcessor
         {
             get
             {
-                return $"OFF{Series:D2} {Name}";
+                return $"Off{Series:D2} {Name}";
             }
         }
 
