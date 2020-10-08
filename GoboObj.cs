@@ -62,9 +62,9 @@ namespace GoboImageProcessor
             setSeries();
         }
 
-        public void SetFilePath(string maVersionFolder)
+        public void SetFilePath(string ma2Folder)
         {
-            string testPath = @"C:\ProgramData\MA Lighting Technologies\grandma\" + maVersionFolder + @"\gobos\" + FileName;
+            string testPath = ma2Folder + @"\gobos\" + FileName;
             if (File.Exists(testPath))
             {
                 FilePath = testPath;

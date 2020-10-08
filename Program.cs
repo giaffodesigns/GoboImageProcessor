@@ -17,7 +17,7 @@ namespace GoboImageProcessor
 {
     class Program
     {
-        static string maVersionFolder = "gma2_V_3.9";
+        
         static int borderSize = 5;
         static Rgba32 onPixel  = new Rgba32(  0, 255,   0, 255);
         static Rgba32 offPixel = new Rgba32(  0,   0,   0, 255);
@@ -33,13 +33,58 @@ namespace GoboImageProcessor
         static List<GoboObj> gobos = new List<GoboObj>();
 
 
-        // come back to handle variables for border and colors
-        //static 
 
+        // NOT YET TESTED
         static void ParseArgs(string[] args)
         {
             // args:
             // GogoImageProcess --bordersize 5 --onColor ff000000 --offcolor 00000000
+            for (int i = 0; i<args.Length; )
+            {
+                // if we're at the start of an argument definition
+                if (args[i].StartsWith("--"))
+                {
+                    string argument = args[i].Substring(2).ToLower();
+                    switch (argument)
+                    {
+                        case "bordersize":
+                        case "b":
+                            bool success = int.TryParse(args[i+1], out borderSize);
+                            if (!success)
+                            {
+                                throw new Exception("invalid following argument to --bordersize: " + args[i + 1]);
+                            } else
+                            {
+                                i += 2;
+                            }
+                            break;
+
+                        case "oncolor":
+                        case "on":
+                            onPixel = Rgba32.ParseHex(args[i + 1]);
+                            i += 2;
+                            break;
+
+                        case "offcolor":
+                        case "off":
+                            offPixel = Rgba32.ParseHex(args[i + 1]);
+                            i += 2;
+                            break;
+
+                        case "ma2version":
+                        case "v":
+                            Paths.ma2General = args[i + 1];
+                            i += 2;
+                            break;
+
+                        default:
+                            Console.WriteLine("unrecognized argument: " + args[i]);
+                            i++;
+                            break;
+                    }
+
+                }
+            }
 
             // handle image dimensions
             widthOrig  = 128;
@@ -54,10 +99,9 @@ namespace GoboImageProcessor
             ParseArgs(args);
 
 
-
             #region Open and parse image list
             // tested. OK.
-            var reader = new StreamReader(Paths.goboInfo);
+            var reader = new StreamReader(Paths.GoboInfo);
             while (!reader.EndOfStream)
             {
                 string line = reader.ReadLine();
@@ -70,7 +114,7 @@ namespace GoboImageProcessor
             foreach(var gobo in gobos)
             {
                 // verify and set full filepaths to source images
-                gobo.SetFilePath(maVersionFolder);
+                gobo.SetFilePath(Paths.ma2General);
 
                 // create on and off copies
                 try
@@ -123,10 +167,16 @@ namespace GoboImageProcessor
                         }
                     }
 
+                    // check that output directory exists; create if it doesn't
+                    if (!Directory.Exists(Paths.Output))
+                    {
+                        CreateDirectory(Paths.Output);
+                    }
+
                     // write images to files
                     var encoder = new PngEncoder();
-                    var outStreamOn  = new FileStream(Paths.output+gobo.OnName+".png",  FileMode.OpenOrCreate, FileAccess.Write);
-                    var outStreamOff = new FileStream(Paths.output+gobo.OffName+".png", FileMode.OpenOrCreate, FileAccess.Write);
+                    var outStreamOn  = new FileStream(Paths.Output+gobo.OnName+".png",  FileMode.OpenOrCreate, FileAccess.Write);
+                    var outStreamOff = new FileStream(Paths.Output+gobo.OffName+".png", FileMode.OpenOrCreate, FileAccess.Write);
                     encoder.Encode(imgOn, outStreamOn);
                     encoder.Encode(imgOff, outStreamOff);
                     outStreamOn.Close();
@@ -146,11 +196,17 @@ namespace GoboImageProcessor
         }
     }
 
-    struct Paths
+    static class Paths
     {
-        static public string maGobos = @"C:\ProgramData\MA Lighting Technologies\grandma\";
-        static public string goboInfo = @"..\..\..\SourceImages\GoboImageInfo.txt";
-        static public string output = @"..\..\..\OutputImages\";
-        static public string input = @"..\..\..\SourceImages\Input1.png";
+        static public string ma2General = @"C:\ProgramData\MA Lighting Technologies\grandma\gma2_V_3.9";
+        static public string Output
+        {
+            get
+            {
+                return ma2General + @"\images\OutputImages\";
+            }
+        }
+        static public string GoboInfo { get { return ma2General + @"\reports\GoboImageInfo.txt"; } }
+        
     }
 }
