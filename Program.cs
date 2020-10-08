@@ -34,11 +34,14 @@ namespace GoboImageProcessor
 
 
 
-        // NOT YET TESTED
         static void ParseArgs(string[] args)
         {
+            foreach (string arg in args)
+            {
+                Console.WriteLine(arg);
+            }
             // args:
-            // GogoImageProcess --bordersize 5 --onColor ff000000 --offcolor 00000000
+            // GogoImageProcess --bordersize 5 --onColor ff000000 --offcolor 00000000 --gma2path
             for (int i = 0; i<args.Length; )
             {
                 // if we're at the start of an argument definition
@@ -71,7 +74,7 @@ namespace GoboImageProcessor
                             i += 2;
                             break;
 
-                        case "ma2version":
+                        case "gma2path":
                         case "v":
                             Paths.ma2General = args[i + 1];
                             i += 2;
