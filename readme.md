@@ -4,7 +4,7 @@ This project is for accompanying interactive-layout plugins for MA2 OnPC. Requir
 
 ## Installation
 
-No installation necessary on distributed binaries, as the project uses .NET Framework 4.7, which is already installed for any OnPC users.
+No installation necessary on distributed binaries, as the project uses .NET Framework 4.7, which is already installed for any OnPC users.code 
 
 
 ## Licensing
