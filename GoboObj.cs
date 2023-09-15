@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Png;
 using System.IO;
 using System.Text;
@@ -115,13 +118,29 @@ namespace GoboImageProcessor
 
             //! COME BACK - update for other image types
             if (!Regex.IsMatch(PathFull, @"\.png$")) {
-                throw new Exception($"Image not accepted. Only .PNG images are currently supported.\n{PathFull}");
-            } 
+                
+            }
 
             // gobo image processing
+            Image<Rgba32> imgOrig;
             var inStream = new FileStream(PathFull, FileMode.Open, FileAccess.Read);
-            var imgOrig = new PngDecoder().Decode<Rgba32>(Configuration.Default, inStream);
-            inStream.Close();
+            string fileExtension = Regex.Match(PathFull, @"\.([a-zA-Z0-9]+)$").Groups[1].Value;
+            switch (fileExtension) {
+                case "png":
+                    imgOrig = new PngDecoder().Decode<Rgba32>(Configuration.Default, inStream);
+                    break;
+                case "bmp":
+                    imgOrig = new BmpDecoder().Decode<Rgba32>(Configuration.Default, inStream);
+                    break;
+                case "jpg":
+                case "jpeg":
+                    imgOrig = new JpegDecoder().Decode<Rgba32>(Configuration.Default, inStream);
+                    break;
+                default:
+                    inStream.Dispose();
+                    throw new Exception($"Image type not recognized. Only .png, .bmp, and .jpg/.jpeg images are currently supported.\n{PathFull}");
+            }
+            inStream.Dispose();
 
             // we are basing our border size on default image sizes of 128px x 128px
             int borderSizeActual = (int)(Math.Round((double)imgOrig.Width / 128) * borderSize);
@@ -176,13 +195,13 @@ namespace GoboImageProcessor
             Console.WriteLine($"Writing Image File: {Paths.DirOutput}{OnName}");
             var outStreamOn  = new FileStream($"{Paths.DirOutput}{OnName}.png", FileMode.OpenOrCreate, FileAccess.Write);
             encoder.Encode(imgOn,  outStreamOn);
-            outStreamOn.Close();
+            outStreamOn.Dispose();
             createdTotal++;
 
             Console.WriteLine($"Writing Image File: {Paths.DirOutput}{OffName}");
             var outStreamOff = new FileStream($"{Paths.DirOutput}{OffName}.png", FileMode.OpenOrCreate, FileAccess.Write);
             encoder.Encode(imgOff, outStreamOff);
-            outStreamOff.Close();
+            outStreamOff.Dispose();
             createdTotal++;
 
             return createdTotal;
